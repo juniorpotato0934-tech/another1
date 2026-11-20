@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>For Kitikat — A Birthday Mailer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--desk:#008080;--face:#c0c0c0;--hi:#fff;--lo:#808080;--dk:#000;--title:#000080;--title2:#1084d0;--ink:#111;--paper:#fffff0;--pink:#ff4fa3;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--desk:#005a5a}}
+:root[data-theme="dark"]{--desk:#005a5a}
+*{box-sizing:border-box}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--desk);font-family:'VT323',"Courier New",monospace;font-size:20px;color:var(--ink);overflow-x:hidden}
+.bevel{background:var(--face);border:2px solid;border-color:var(--hi) var(--dk) var(--dk) var(--hi);box-shadow:inset -1px -1px var(--lo),inset 1px 1px #dfdfdf}
+.titlebar{background:linear-gradient(90deg,var(--title),var(--title2));color:#fff;padding:3px 6px;display:flex;justify-content:space-between;align-items:center;font-size:20px}
+.btn{font-family:inherit;font-size:20px;background:var(--face);color:var(--ink);border:2px solid;border-color:var(--hi) var(--dk) var(--dk) var(--hi);box-shadow:inset -1px -1px var(--lo);padding:2px 12px;cursor:pointer}
+.btn:active{border-color:var(--dk) var(--hi) var(--hi) var(--dk)}
+.stage1{min-height:calc(100vh - 40px);display:flex;align-items:center;justify-content:center;padding:20px}
+.win{width:min(460px,100%)}
+.win .body{padding:18px;text-align:center}
+.postmark{display:inline-block;border:3px double #a00;color:#a00;padding:8px 14px;transform:rotate(-6deg);margin-bottom:14px;line-height:1.1;font-size:20px}
+.win h1{font-weight:400;font-size:30px;margin:0 0 8px;line-height:1.1}
+.hint{margin:0 0 16px}
+#mailLink{font-family:'Kalam',cursive;font-weight:700;font-size:20px;color:#00e;text-decoration:underline;background:none;border:none;cursor:pointer;padding:6px}
+#mailLink:hover{color:var(--pink)}
+.desktop-note{margin:14px 0 0;font-size:17px;color:#444}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:50;opacity:0;pointer-events:none;transition:opacity .25s;padding:20px}
+.overlay.show{opacity:1;pointer-events:auto}
+.dlg{width:min(380px,100%)}
+.dlg .body{padding:20px;text-align:center}
+.env{position:relative;height:150px;margin:0 auto 16px;background:#e8c89a;border:2px solid #7a5a30;overflow:hidden}
+.env::before{content:"";position:absolute;inset:0;background:linear-gradient(to bottom right,transparent 49%,#7a5a30 50%,transparent 51%),linear-gradient(to bottom left,transparent 49%,#7a5a30 50%,transparent 51%)}
+.flap{position:absolute;top:0;left:0;right:0;height:60%;background:#d2a96f;clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:top;transition:transform .6s}
+.dlg.open .flap{transform:rotateX(180deg)}
+.stamp-btn{position:absolute;left:50%;top:56%;transform:translate(-50%,-50%) rotate(-6deg);width:84px;height:84px;border-radius:50%;background:#c22;color:#fff;border:3px dashed #fff;font-family:inherit;font-size:22px;line-height:1;cursor:pointer;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{transform:translate(-50%,-50%) rotate(-6deg) scale(1.08)}}
+.dlg.open .stamp-btn{display:none}
+.confetti-piece{position:fixed;top:-20px;z-index:60;pointer-events:none}
+.stage2{display:none;min-height:calc(100vh - 40px);padding:24px 14px 90px;justify-content:center;align-items:flex-start}
+.stage2.show{display:flex}
+.mail{width:min(740px,100%);animation:pop .4s ease-out}
+@keyframes pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+.menu{display:flex;gap:16px;padding:2px 8px;border-bottom:1px solid var(--lo)}
+.menu span{font-size:18px}
+.photos{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px 12px 0}
+.ph{background:var(--face);padding:4px 4px 2px;border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo);text-align:center;font-family:'Kalam',cursive;font-weight:700;font-size:13px}
+.ph img,.ph .miss{width:100%;height:92px;object-fit:cover;display:block;background:#bbb}
+.miss{display:flex;align-items:center;justify-content:center;font-size:12px;color:#555;padding:4px;line-height:1.2}
+.letter{margin:10px 12px 12px;padding:22px 22px 26px;background:var(--paper);border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo)}
+.letter-header{font-weight:400;font-size:clamp(34px,8vw,56px);line-height:1;text-align:center;margin:4px 0;color:var(--title);text-shadow:3px 3px 0 var(--pink)}
+.letter-sub{text-align:center;font-family:'Kalam',cursive;font-weight:700;color:#066;margin:0 0 20px;font-size:16px}
+.letter-body{font-size:23px;line-height:1.45;max-width:60ch;margin:0 auto}
+.letter-body p{margin:0 0 14px}
+.signature{font-family:'Kalam',cursive;font-weight:700;font-size:20px;color:#066;text-align:right;margin:8px 0 0}
+.taskbar{position:fixed;left:0;right:0;bottom:0;padding-bottom:env(safe-area-inset-bottom,0px);height:calc(40px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:8px;padding-left:6px;padding-right:6px;background:var(--face);border-top:2px solid var(--hi);z-index:40}
+.start{font-weight:700}
+.player{display:none;align-items:center;gap:8px;margin-left:auto;min-width:0;padding:2px 8px;border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo);font-size:17px}
+.player.show{display:flex}
+.player button{padding:0 8px;font-size:16px}
+.player span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46vw}
+@media(max-width:560px){.photos{grid-template-columns:repeat(2,1fr)}.letter-body{font-size:21px}}
+</style>
+</head>
+<body>
+
+<section class="stage1" id="stage1">
+  <div class="win bevel">
+    <div class="titlebar"><span>📧 New Mail</span><span>_ □ ✕</span></div>
+    <div class="body">
+      <div class="postmark">KITIKAT<br>★ 1996 ★<br>MAIL</div>
+      <h1>A letter has arrived for you...</h1>
+      <p class="hint">It won't open the normal way. Try giving it a right-click.</p>
+      <a href="#" id="mailLink">↳ a mysterious envelope, addressed to Kitikat</a>
+      <p class="desktop-note">(on a phone, press and hold the link instead)</p>
+    </div>
+  </div>
+</section>
+
+<div class="overlay" id="overlay">
+  <div class="dlg win bevel" id="envelopeWrap">
+    <div class="titlebar"><span>📨 Envelope</span><button class="btn" id="closeOverlay" style="padding:0 8px;font-size:16px">✕ close</button></div>
+    <div class="body">
+      <div class="env"><div class="flap"></div><button class="stamp-btn" id="stampBtn">OPEN<br>ME</button></div>
+    </div>
+  </div>
+</div>
+
+<section class="stage2" id="stage2">
+  <div class="mail bevel">
+    <div class="titlebar"><span>📧 For Kitikat — A Birthday Mailer</span><span>_ □ ✕</span></div>
+    <div class="menu"><span>File</span><span>Edit</span><span>View</span><span>Help</span></div>
+    <div class="photos">
+      <div class="ph"><img id="photo1" alt="photo 1"><div>my fave ♥</div></div>
+      <div class="ph"><img id="photo2" alt="photo 2"><div>90s baby</div></div>
+      <div class="ph"><img id="photo3" alt="photo 3"><div>15th</div></div>
+      <div class="ph"><img id="photo4" alt="photo 4"><div>iconic</div></div>
+    </div>
+    <div class="letter">
+      <h1 class="letter-header">Happy 19th<br>Birthday Kitikat</h1>
+      <p class="letter-sub">✂ - - - - mail call - - - - ✂</p>
+      <div class="letter-body">
+        <p>Dear Kitikat,</p>
+        <p>Happy 19th birthday. Cheers on your success for being a student nurse. You are almost there, don't give up. I'm rooting for your success. I hope your birthday celebration will be joyful and fun. May your day be blessed with love.</p>
+        <p>Look at you now, all grown up and officially old, hehe. But don't worry, you're still as short as ever. some things never change</p>
+        <p>Anyway, enjoy your day, Kiti Liry. Once again, happy birthday ^ , ^</p>
+      </div>
+      <p class="signature">— Old dude, always</p>
+      
+    </div>
+  </div>
+</section>
+
+<div class="taskbar">
+  <button class="btn start">⊞ Start</button>
+  <div class="player" id="player">
+    <button class="btn" id="playPause">❚❚</button>
+    <span id="trackLabel">now playing…</span>
+  </div>
+</div>
+
+<audio id="bgAudio" loop></audio>
+
+<script>
+const MUSIC_SRC="Blackbird.mp3";
+const MUSIC_TITLE="The Beatles - Blackbird ";
+const PHOTOS=["k1.jpg","k2.jpg","k3.jpg","k4.jpg"];
+
+PHOTOS.forEach((src,i)=>{
+  const img=document.getElementById("photo"+(i+1));
+  img.src=src;
+  img.onerror=()=>{
+    const d=document.createElement("div");
+    d.className="miss";
+    d.innerHTML="add<br>"+src;
+    img.replaceWith(d);
+  };
+});
+
+const audio=document.getElementById("bgAudio");
+audio.src=MUSIC_SRC;
+document.getElementById("trackLabel").textContent="♫ "+MUSIC_TITLE;
+const pp=document.getElementById("playPause");
+pp.addEventListener("click",()=>{
+  if(audio.paused){audio.play().catch(()=>{});pp.textContent="❚❚";}
+  else{audio.pause();pp.textContent="▶";}
+});
+
+const mailLink=document.getElementById("mailLink"),overlay=document.getElementById("overlay"),
+envWrap=document.getElementById("envelopeWrap"),stampBtn=document.getElementById("stampBtn"),
+closeBtn=document.getElementById("closeOverlay"),stage1=document.getElementById("stage1"),
+stage2=document.getElementById("stage2"),player=document.getElementById("player");
+let t=null;
+const openOverlay=()=>overlay.classList.add("show");
+const hideOverlay=()=>overlay.classList.remove("show");
+mailLink.addEventListener("contextmenu",e=>{e.preventDefault();openOverlay();});
+mailLink.addEventListener("touchstart",()=>{t=setTimeout(openOverlay,450);});
+["touchend","touchmove"].forEach(ev=>mailLink.addEventListener(ev,()=>clearTimeout(t)));
+mailLink.addEventListener("click",e=>{e.preventDefault();openOverlay();});
+closeBtn.addEventListener("click",hideOverlay);
+overlay.addEventListener("click",e=>{if(e.target===overlay)hideOverlay();});
+
+stampBtn.addEventListener("click",()=>{
+  envWrap.classList.add("open");
+  burstConfetti();
+  audio.play().catch(()=>{});
+  player.classList.add("show");
+  setTimeout(()=>{
+    hideOverlay();
+    stage1.style.display="none";
+    stage2.classList.add("show");
+    window.scrollTo(0,0);
+  },900);
+});
+
+function burstConfetti(){
+  const colors=["#ff4fa3","#ffd400","#00b7c3","#ffffff","#7a5cff"];
+  for(let i=0;i<90;i++){
+    const p=document.createElement("div");
+    p.className="confetti-piece";
+    const s=6+Math.random()*8,x=innerWidth/2+(Math.random()-.5)*160,dr=(Math.random()-.5)*340,
+    du=1600+Math.random()*1400,de=Math.random()*250;
+    p.style.cssText+=`left:${x}px;width:${s}px;height:${s*(Math.random()>.5?1:1.6)}px;background:${colors[i%5]};transition:transform ${du}ms ease-out ${de}ms,opacity ${du}ms ease-in ${de}ms`;
+    document.body.appendChild(p);
+    requestAnimationFrame(()=>{p.style.transform=`translateY(${innerHeight+60}px) translateX(${dr}px) rotate(${360+Math.random()*360}deg)`;p.style.opacity="0";});
+    setTimeout(()=>p.remove(),du+de+100);
+  }
+}
+</script>
+</body>
+</html>
